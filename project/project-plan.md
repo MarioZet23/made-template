@@ -25,9 +25,24 @@ I aim to find out if certain factors—like age, income, racial makeup, educatio
 * Data URL: https://data.ny.gov/resource/vw9z-y4t7.csv
 * Data Type: CSV
 
-### Datasource1: NY Census
+### Datasource2: NY Census - Age and Gender Distribution
 * Metadata URL: https://data.census.gov/table/ACSST5Y2022.S0101?g=040XX00US36$0500000
 * Data URL: https://api.census.gov/data/2022/acs/acs5/subject?get=group(S0101)&ucgid=pseudo(0400000US36$0500000)
+* Data Type: JSON
+
+### Datasource3: NY Census - Education Attainment
+* Metadata URL: https://data.census.gov/table/ACSSE2023.K201501?t=Education:Educational%20Attainment&g=040XX00US36$0500000
+* Data URL: https://api.census.gov/data/2023/acs/acsse?get=group(K201501)&ucgid=pseudo(0400000US36$0500000)
+* Data Type: JSON
+
+### Datasource4: NY Census - Race
+* Metadata URL: https://data.census.gov/table/ACSDT5Y2022.B02001?t=Race%20and%20Ethnicity&g=040XX00US36$0500000
+* Data URL: https://api.census.gov/data/2022/acs/acs5?get=group(B02001)&ucgid=pseudo(0400000US36$0500000)
+* Data Type: JSON
+
+### Datasource5: NY Census - Income
+* Metadata URL: https://data.census.gov/table/ACSDT5Y2022.B02001?t=Race%20and%20Ethnicity&g=040XX00US36$0500000
+* Data URL: https://api.census.gov/data/2022/acs/acs5?get=group(B02001)&ucgid=pseudo(0400000US36$0500000)
 * Data Type: JSON
 
 

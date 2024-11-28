@@ -77,7 +77,6 @@ def download_rural(url):
     try:
         df = df.rename(
             columns={
-                "NAME": "county",
                 "H2_001N": "Total Households",
                 "H2_002N": "Urban Households",
                 "H2_003N": "Rural Households",
@@ -204,6 +203,9 @@ def download_income(url):
 
 
 if __name__ == "__main__":
+    print(
+        "This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau."
+    )
     if not os.path.exists("data/raw"):
         os.makedirs("data/raw")
     if not os.path.exists("data/processed"):

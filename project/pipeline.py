@@ -2,6 +2,21 @@ import pandas as pd
 import os
 import requests
 
+print(
+    "This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau."
+)
+
+urls = {
+    "registration_records": "https://data.ny.gov/resource/vw9z-y4t7.csv",
+    "rural": "https://api.census.gov//data/2020/dec/dhc?get=group(H2)&ucgid=pseudo(0400000US36$0500000)",
+    "education": "https://api.census.gov//data/2023/acs/acsse?get=group(K201501)&ucgid=pseudo(0400000US36$0500000)",
+    "age_sex": "https://api.census.gov//data/2022/acs/acs5/subject?get=group(S0101)&ucgid=pseudo(0400000US36$0500000)",
+    "race": "https://api.census.gov//data/2022/acs/acs5?get=group(B02001)&ucgid=pseudo(0400000US36$0500000)",
+    "income": "https://api.census.gov//data/2022/acs/acs5/subject?get=group(S1901)&ucgid=pseudo(0400000US36$0500000)",
+}
+
+base_path = "."
+
 
 def normalise_county_name(s):
     s = s.str.replace(" County, New York", "").str.upper()
@@ -13,15 +28,15 @@ def normalise_county_name(s):
 def download_registration_records(url):
     # Download the registration records
     try:
-        if not os.path.exists("data/raw/registration_records.csv"):
+        if not os.path.exists(base_path + "/data/raw/registration_records.csv"):
             print("Downloading registration records...")
             r = requests.get(url)
-            with open("data/raw/registration_records.csv", "wb") as f:
+            with open(base_path + "/data/raw/registration_records.csv", "wb") as f:
                 f.write(r.content)
     except:
         raise Exception("Failed to download registration records")
     try:
-        df = pd.read_csv("data/raw/registration_records.csv")
+        df = pd.read_csv(base_path + "/data/raw/registration_records.csv")
         df = df[df["record_type"] == "VEH"]
         # Count Electric Vehicles and other vehicles by County
         df = df.groupby("county").apply(
@@ -34,7 +49,8 @@ def download_registration_records(url):
                         x["fuel_type"] != "ELECTRIC"
                     ].sum(),
                 }
-            )
+            ),
+            include_groups=False,
         )
         df["Total Vehicles"] = df["Electric Vehicles"] + df["Other Vehicles"]
         df["EV_Percent"] = df["Electric Vehicles"] / df["Total Vehicles"]
@@ -44,7 +60,7 @@ def download_registration_records(url):
         # print(df)
         # print((df["EV_Percent"]*df["Total Vehicles"]).sum()/df["Total Vehicles"].sum())
         print("Saving processed data...")
-        df.to_csv("data/processed/registration_records.csv")
+        df.to_csv(base_path + "/data/processed/registration_records.csv")
         return df
     except:
         raise Exception("Failed to parse registration records")
@@ -52,15 +68,15 @@ def download_registration_records(url):
 
 def download_from_census(url, filename):
     try:
-        if not os.path.exists("data/raw/" + filename):
+        if not os.path.exists(base_path + "/data/raw/" + filename):
             print(f"Downloading {filename} data from census...")
             r = requests.get(url)
-            with open("data/raw/" + filename + ".json", "wb") as f:
+            with open(base_path + "/data/raw/" + filename + ".json", "wb") as f:
                 f.write(r.content)
     except:
         raise Exception(f"Failed to download {filename} data from census")
     try:
-        df = pd.read_json("data/raw/" + filename + ".json")
+        df = pd.read_json(base_path + "/data/raw/" + filename + ".json")
         df.columns = df.iloc[0]
         df = df.drop(0)
         df = df.rename(columns={"NAME": "county"})
@@ -96,7 +112,7 @@ def download_rural(url):
         df = df.apply(pd.to_numeric)
         df["Rural Percent"] = df["Rural Households"] / df["Total Households"]
         df = df["Rural Percent"]
-        df.to_csv("data/processed/rural.csv")
+        df.to_csv(base_path + "/data/processed/rural.csv")
         print(df)
         return df
     except:
@@ -142,7 +158,7 @@ def download_education(url):
             + 7 * df["Graduate or Professional Degree"]
         ) / df["Total"]
         df = df["Average Education Level"]
-        df.to_csv("data/processed/education.csv")
+        df.to_csv(base_path + "/data/processed/education.csv")
         print(df)
         return df
     except:
@@ -159,7 +175,7 @@ def download_age_sex(url):
                 "S0101_C01_033E": "Females per 100 Males",
             }
         )
-        df.to_csv("data/processed/age_sex.csv")
+        df.to_csv(base_path + "/data/processed/age_sex.csv")
         print(df)
         return df
     except:
@@ -183,7 +199,7 @@ def download_race(url):
                 "B02001_008E": "Mixed (%)",
             }
         )
-        df.to_csv("data/processed/race.csv")
+        df.to_csv(base_path + "/data/processed/race.csv")
         print(df)
         return df
     except:
@@ -195,49 +211,37 @@ def download_income(url):
     try:
         df = df["S1901_C01_012E"]
         df.name = "Median Household Income"
-        df.to_csv("data/processed/income.csv")
+        df.to_csv(base_path + "/data/processed/income.csv")
         print(df)
         return df
     except:
         raise Exception("Failed to parse income data")
 
 
-if __name__ == "__main__":
+def create_directories():
+    if not os.path.exists(base_path + "/data/raw"):
+        os.makedirs(base_path + "/data/raw")
+    if not os.path.exists(base_path + "/data/processed"):
+        os.makedirs(base_path + "/data/processed")
+
+
+def main():
     print(
         "This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau."
     )
-    if not os.path.exists("data/raw"):
-        os.makedirs("data/raw")
-    if not os.path.exists("data/processed"):
-        os.makedirs("data/processed")
+    create_directories()
     df = pd.DataFrame()
     df = df.join(
-        download_registration_records("https://data.ny.gov/resource/vw9z-y4t7.csv"),
+        download_registration_records(urls["registration_records"]),
         how="outer",
     )
-    df = df.join(
-        download_rural(
-            "https://api.census.gov/data/2020/dec/dhc?get=group(H2)&ucgid=pseudo(0400000US36$0500000)"
-        )
-    )
-    df = df.join(
-        download_education(
-            "https://api.census.gov/data/2023/acs/acsse?get=group(K201501)&ucgid=pseudo(0400000US36$0500000)"
-        )
-    )
-    df = df.join(
-        download_age_sex(
-            "https://api.census.gov/data/2022/acs/acs5/subject?get=group(S0101)&ucgid=pseudo(0400000US36$0500000)"
-        )
-    )
-    df = df.join(
-        download_race(
-            "https://api.census.gov/data/2022/acs/acs5?get=group(B02001)&ucgid=pseudo(0400000US36$0500000)"
-        )
-    )
-    df = df.join(
-        download_income(
-            "https://api.census.gov/data/2022/acs/acs5/subject?get=group(S1901)&ucgid=pseudo(0400000US36$0500000)"
-        )
-    )
-    df.to_csv("data/results.csv")
+    df = df.join(download_rural(urls["rural"]))
+    df = df.join(download_education(urls["education"]))
+    df = df.join(download_age_sex(urls["age_sex"]))
+    df = df.join(download_race(urls["race"]))
+    df = df.join(download_income(urls["income"]))
+    df.to_csv(base_path + "/data/results.csv")
+
+
+if __name__ == "__main__":
+    main()

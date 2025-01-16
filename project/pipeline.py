@@ -9,7 +9,7 @@ print(
 urls = {
     "registration_records": "https://data.ny.gov/resource/vw9z-y4t7.csv",
     "rural": "https://api.census.gov//data/2020/dec/dhc?get=group(H2)&ucgid=pseudo(0400000US36$0500000)",
-    "education": "https://api.census.gov//data/2023/acs/acsse?get=group(K201501)&ucgid=pseudo(0400000US36$0500000)",
+    "education": "https://api.census.gov//data/2022/acs/acsse?get=group(K201501)&ucgid=pseudo(0400000US36$0500000)",
     "age_sex": "https://api.census.gov//data/2022/acs/acs5/subject?get=group(S0101)&ucgid=pseudo(0400000US36$0500000)",
     "race": "https://api.census.gov//data/2022/acs/acs5?get=group(B02001)&ucgid=pseudo(0400000US36$0500000)",
     "income": "https://api.census.gov//data/2022/acs/acs5/subject?get=group(S1901)&ucgid=pseudo(0400000US36$0500000)",
